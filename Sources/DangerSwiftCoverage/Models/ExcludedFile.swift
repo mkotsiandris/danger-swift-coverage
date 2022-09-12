@@ -1,3 +1,5 @@
+import Foundation
+
 public enum ExcludedFile: Equatable {
     case exact(String)
     case prefix(String)
@@ -10,7 +12,7 @@ public enum ExcludedFile: Equatable {
             case let .exact(needle):
                 return fileName == needle
             case let .prefix(needle):
-                fileName.hasPrefix(needle)
+                return fileName.hasPrefix(needle)
             case let .suffix(needle):
                 return fileName.hasSuffix(needle)
             case let .regex(regex):

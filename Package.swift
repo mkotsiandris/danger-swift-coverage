@@ -11,7 +11,6 @@ let package = Package(
             name: "DangerSwiftCoverage",
             targets: ["DangerSwiftCoverage"]
         ),
-//        .library(name: "DangerDeps", type: .dynamic, targets: ["DangerDependencies"]), // dev
     ],
     dependencies: [
         .package(url: "https://github.com/danger/swift.git", from: "3.0.0"),
@@ -26,7 +25,9 @@ let package = Package(
         .target(name: "DangerDependencies", dependencies: ["Danger", "DangerSwiftCoverage", "DangerXCodeSummary"]), // dev
         .target(
             name: "DangerSwiftCoverage",
-            dependencies: [.product(name: "Danger", package: "swift")]
+            dependencies: [
+                .product(name: "Danger", package: "swift")
+            ]
         ),
         .testTarget(
             name: "DangerSwiftCoverageTests",
