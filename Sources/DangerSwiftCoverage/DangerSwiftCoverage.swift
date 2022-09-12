@@ -38,8 +38,10 @@ public enum Coverage {
     ) {
         let paths = modifiedFilesAbsolutePaths(fileManager: fileManager, danger: danger).filter { file in
             for excludedFile in excludedFiles {
-                print("File ignored from code coverage: \(file)")
-                return !excludedFile.matches(string: file)
+                if excludedFile.matches(string: file) {
+                    print("Ignoring file \(file)")
+                    return false
+                }
             }
             return true
         }
