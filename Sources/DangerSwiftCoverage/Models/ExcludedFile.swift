@@ -7,7 +7,9 @@ public enum ExcludedFile: Equatable {
     case regex(String)
 
     func matches(string: String) -> Bool {
-        guard let fileURL = URL(string: string), let fileName = fileURL.pathComponents.last else { return false }
+        guard let fileURL = URL(string: string) else { return false }
+        let fileName = fileURL.lastPathComponent
+
         switch self {
             case let .exact(needle):
                 return fileName == needle

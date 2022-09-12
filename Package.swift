@@ -22,12 +22,9 @@ let package = Package(
         .package(url: "https://github.com/f-meloni/danger-swift-xcodesummary", from: "1.0.0"), // dev
     ],
     targets: [
-        .target(name: "DangerDependencies", dependencies: ["Danger", "DangerSwiftCoverage", "DangerXCodeSummary"]), // dev
         .target(
             name: "DangerSwiftCoverage",
-            dependencies: [
-                .product(name: "Danger", package: "swift")
-            ]
+            dependencies: ["Danger"]
         ),
         .testTarget(
             name: "DangerSwiftCoverageTests",
