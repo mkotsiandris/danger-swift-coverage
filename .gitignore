@@ -4,4 +4,4 @@
 /*.xcodeproj
 Build
 result.json
-.swiftpm/xcode/xcuserdata/
+.swiftpm/xcode/xcuserdata/*

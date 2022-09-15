@@ -11,6 +11,7 @@ let package = Package(
             name: "DangerSwiftCoverage",
             targets: ["DangerSwiftCoverage"]
         ),
+        .library(name: "DangerDeps", type: .dynamic, targets: ["DangerDependencies"]), // dev
     ],
     dependencies: [
         .package(url: "https://github.com/danger/swift.git", from: "3.0.0"),
@@ -22,6 +23,7 @@ let package = Package(
         .package(url: "https://github.com/f-meloni/danger-swift-xcodesummary", from: "1.0.0"), // dev
     ],
     targets: [
+        .target(name: "DangerDependencies", dependencies: ["Danger", "DangerSwiftCoverage", "DangerXCodeSummary"]), // dev
         .target(
             name: "DangerSwiftCoverage",
             dependencies: ["Danger"]
@@ -34,21 +36,21 @@ let package = Package(
 )
 
 #if canImport(PackageConfig)
-    import PackageConfig
+import PackageConfig
 
-    let config = PackageConfiguration([
-        "komondor": [
-            "pre-commit": [
-                "swift test --generate-linuxmain",
-                "swift run swiftformat .",
-                "swift run swiftlint autocorrect --path Sources/",
-                "git add .",
-            ],
+let config = PackageConfiguration([
+    "komondor": [
+        "pre-commit": [
+            "swift test --generate-linuxmain",
+            "swift run swiftformat .",
+            "swift run swiftlint autocorrect --path Sources/",
+            "git add .",
         ],
-        "rocket": [
-            "after": [
-                "push",
-            ],
+    ],
+    "rocket": [
+        "after": [
+            "push",
         ],
-    ]).write()
+    ],
+]).write()
 #endif
