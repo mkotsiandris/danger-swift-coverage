@@ -16,21 +16,44 @@ public enum Coverage {
         }
     }
 
-    public static func xcodeBuildCoverage(_ coveragePathType: CoveragePathType, minimumCoverage: Float, excludedTargets: [String] = [], hideProjectCoverage: Bool = false) {
+    public static func xcodeBuildCoverage(_ coveragePathType: CoveragePathType, minimumCoverage: Float, excludedTargets: [String] = [], excludedFiles: [ExcludedFile] = [], hideProjectCoverage: Bool = false) {
         let exactExcludedTargets = excludedTargets.map(ExcludedTarget.exact)
-        xcodeBuildCoverage(coveragePathType, minimumCoverage: minimumCoverage, excludedTargets: exactExcludedTargets, hideProjectCoverage: hideProjectCoverage, fileManager: .default, xcodeBuildCoverageParser: XcodeBuildCoverageParser.self, xcresultFinder: XcresultBundleFinder.self, danger: Danger())
+        xcodeBuildCoverage(coveragePathType, minimumCoverage: minimumCoverage, excludedTargets: exactExcludedTargets, excludedFiles: excludedFiles, hideProjectCoverage: hideProjectCoverage, fileManager: .default, xcodeBuildCoverageParser: XcodeBuildCoverageParser.self, xcresultFinder: XcresultBundleFinder.self, danger: Danger())
     }
 
-    public static func xcodeBuildCoverage(_ coveragePathType: CoveragePathType, minimumCoverage: Float, excludedTargets: [ExcludedTarget], hideProjectCoverage: Bool = false) {
-        xcodeBuildCoverage(coveragePathType, minimumCoverage: minimumCoverage, excludedTargets: excludedTargets, hideProjectCoverage: hideProjectCoverage, fileManager: .default, xcodeBuildCoverageParser: XcodeBuildCoverageParser.self, xcresultFinder: XcresultBundleFinder.self, danger: Danger())
+    public static func xcodeBuildCoverage(_ coveragePathType: CoveragePathType, minimumCoverage: Float, excludedTargets: [ExcludedTarget], excludedFiles: [ExcludedFile] = [], hideProjectCoverage: Bool = false) {
+        xcodeBuildCoverage(coveragePathType, minimumCoverage: minimumCoverage, excludedTargets: excludedTargets, excludedFiles: excludedFiles, hideProjectCoverage: hideProjectCoverage, fileManager: .default, xcodeBuildCoverageParser: XcodeBuildCoverageParser.self, xcresultFinder: XcresultBundleFinder.self, danger: Danger())
     }
 
-    static func xcodeBuildCoverage(_ coveragePathType: CoveragePathType, minimumCoverage: Float, excludedTargets: [ExcludedTarget], hideProjectCoverage: Bool = false, fileManager: FileManager, xcodeBuildCoverageParser: XcodeBuildCoverageParsing.Type, xcresultFinder: XcresultBundleFinding.Type, danger: DangerDSL) {
-        let paths = modifiedFilesAbsolutePaths(fileManager: fileManager, danger: danger)
+    static func xcodeBuildCoverage(
+        _ coveragePathType: CoveragePathType,
+        minimumCoverage: Float,
+        excludedTargets: [ExcludedTarget],
+        excludedFiles: [ExcludedFile],
+        hideProjectCoverage: Bool = false,
+        fileManager: FileManager,
+        xcodeBuildCoverageParser: XcodeBuildCoverageParsing.Type,
+        xcresultFinder: XcresultBundleFinding.Type,
+        danger: DangerDSL
+    ) {
+        let paths = modifiedFilesAbsolutePaths(fileManager: fileManager, danger: danger).filter { file in
+            for excludedFile in excludedFiles {
+                if excludedFile.matches(string: file) {
+                    print("Ignoring file \(file)")
+                    return false
+                }
+            }
+            return true
+        }
 
         do {
             let xcresultBundlePath = try coveragePathType.xcresultBundlePath(xcresultFinder: xcresultFinder, fileManager: fileManager)
-            let report = try xcodeBuildCoverageParser.coverage(xcresultBundlePath: xcresultBundlePath, files: paths, excludedTargets: excludedTargets, hideProjectCoverage: hideProjectCoverage)
+            let report = try xcodeBuildCoverageParser.coverage(
+                xcresultBundlePath: xcresultBundlePath,
+                files: paths,
+                excludedTargets: excludedTargets,
+                hideProjectCoverage: hideProjectCoverage
+            )
             sendReport(report, minumumCoverage: minimumCoverage, danger: danger)
         } catch {
             danger.fail("Failed to get the coverage - Error: \(error.localizedDescription)")
